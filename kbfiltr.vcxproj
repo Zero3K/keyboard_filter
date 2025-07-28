@@ -60,14 +60,14 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
-    <TargetVersion>Win7</TargetVersion>
+    <TargetVersion>WindowsV6.1</TargetVersion>
     <UseDebugLibraries>False</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
-    <TargetVersion>Win8</TargetVersion>
+    <TargetVersion>WindowsV6.2</TargetVersion>
     <UseDebugLibraries>False</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -81,14 +81,14 @@
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-    <TargetVersion>Win7</TargetVersion>
+    <TargetVersion>WindowsV6.1</TargetVersion>
     <UseDebugLibraries>True</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
-    <TargetVersion>Win8</TargetVersion>
+    <TargetVersion>WindowsV6.2</TargetVersion>
     <UseDebugLibraries>True</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -102,14 +102,14 @@
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
-    <TargetVersion>Win7</TargetVersion>
+    <TargetVersion>WindowsV6.1</TargetVersion>
     <UseDebugLibraries>False</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
-    <TargetVersion>Win8</TargetVersion>
+    <TargetVersion>WindowsV6.2</TargetVersion>
     <UseDebugLibraries>False</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
@@ -123,14 +123,14 @@
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
-    <TargetVersion>Win7</TargetVersion>
+    <TargetVersion>WindowsV6.1</TargetVersion>
     <UseDebugLibraries>True</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
-    <TargetVersion>Win8</TargetVersion>
+    <TargetVersion>WindowsV6.2</TargetVersion>
     <UseDebugLibraries>True</UseDebugLibraries>
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver8.1</PlatformToolset>
