@@ -57,6 +57,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Win8.1 Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <SampleGuid>{E2D8CF21-3542-488F-9736-355EEB121956}</SampleGuid>
+    <ValidNTTargetVersions>6.1;6.2;6.3</ValidNTTargetVersions>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
