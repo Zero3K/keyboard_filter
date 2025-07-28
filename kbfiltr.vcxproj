@@ -60,6 +60,7 @@
     <ValidNTTargetVersions>6.1;6.2;6.3</ValidNTTargetVersions>
     <VslTargetFrameworkVersion>v4.5</VslTargetFrameworkVersion>
     <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <SignMode>Off</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
