@@ -176,6 +176,13 @@ Return Value:
     filterExt = FilterGetData(hDevice);
 
     //
+    // Initialize lag mitigation structures
+    //
+    KeInitializeSpinLock(&filterExt->RecentKeysLock);
+    filterExt->RecentKeyIndex = 0;
+    RtlZeroMemory(filterExt->RecentKeys, sizeof(filterExt->RecentKeys));
+
+    //
     // Configure the default queue to be Parallel. Do not use sequential queue
     // if this driver is going to be filtering PS2 ports because it can lead to
     // deadlock. The PS2 port driver sends a request to the top of the stack when it
@@ -761,6 +768,121 @@ Return Value:
     return retVal;
 }
 
+BOOLEAN
+KbFilter_IsRecentDuplicateKey(
+    IN PDEVICE_EXTENSION DevExt,
+    IN PKEYBOARD_INPUT_DATA InputData
+    )
+/*++
+
+Routine Description:
+
+    Checks if the current key input is a recent duplicate that should be filtered
+    out due to lag-induced multiple key presses.
+
+Arguments:
+
+    DevExt - Device extension containing recent key tracking data
+    InputData - Current keyboard input data to check
+
+Return Value:
+
+    TRUE if this is a recent duplicate that should be filtered, FALSE otherwise.
+
+--*/
+{
+    KIRQL oldIrql;
+    LARGE_INTEGER currentTime;
+    LARGE_INTEGER timeDiff;
+    ULONG i;
+    BOOLEAN isDuplicate = FALSE;
+
+    // Only filter key-down events (make codes)
+    if (InputData->Flags & KEY_BREAK) {
+        return FALSE;
+    }
+
+    KeQuerySystemTime(&currentTime);
+
+    KeAcquireSpinLock(&DevExt->RecentKeysLock, &oldIrql);
+
+    // Check recent keys for duplicates
+    for (i = 0; i < MAX_RECENT_KEYS; i++) {
+        PRECENT_KEY_INPUT recentKey = &DevExt->RecentKeys[i];
+        
+        // Skip empty slots
+        if (recentKey->MakeCode == 0) {
+            continue;
+        }
+
+        // Check if this is the same key
+        if (recentKey->MakeCode == InputData->MakeCode) {
+            // Calculate time difference in 100ns units
+            timeDiff.QuadPart = currentTime.QuadPart - recentKey->Timestamp.QuadPart;
+            
+            // Convert to milliseconds (100ns units to ms)
+            LONG timeDiffMs = (LONG)(timeDiff.QuadPart / 10000);
+            
+            // If within threshold, it's a duplicate
+            if (timeDiffMs < LAG_MITIGATION_THRESHOLD_MS) {
+                isDuplicate = TRUE;
+                DebugPrint(("Filtered duplicate key 0x%x (time diff: %dms)\n", 
+                           InputData->MakeCode, timeDiffMs));
+                break;
+            }
+        }
+    }
+
+    KeReleaseSpinLock(&DevExt->RecentKeysLock, oldIrql);
+
+    return isDuplicate;
+}
+
+VOID
+KbFilter_AddRecentKey(
+    IN PDEVICE_EXTENSION DevExt,
+    IN PKEYBOARD_INPUT_DATA InputData
+    )
+/*++
+
+Routine Description:
+
+    Adds a key input to the recent keys tracking for lag mitigation.
+
+Arguments:
+
+    DevExt - Device extension containing recent key tracking data
+    InputData - Keyboard input data to add to recent keys
+
+Return Value:
+
+    None.
+
+--*/
+{
+    KIRQL oldIrql;
+    LARGE_INTEGER currentTime;
+
+    // Only track key-down events (make codes)
+    if (InputData->Flags & KEY_BREAK) {
+        return;
+    }
+
+    KeQuerySystemTime(&currentTime);
+
+    KeAcquireSpinLock(&DevExt->RecentKeysLock, &oldIrql);
+
+    // Add to circular buffer
+    DevExt->RecentKeys[DevExt->RecentKeyIndex].MakeCode = InputData->MakeCode;
+    DevExt->RecentKeys[DevExt->RecentKeyIndex].Flags = InputData->Flags;
+    DevExt->RecentKeys[DevExt->RecentKeyIndex].Timestamp = currentTime;
+
+    // Move to next slot in circular buffer
+    DevExt->RecentKeyIndex = (DevExt->RecentKeyIndex + 1) % MAX_RECENT_KEYS;
+
+    KeReleaseSpinLock(&DevExt->RecentKeysLock, oldIrql);
+}
+
 VOID
 KbFilter_ServiceCallback(
     IN PDEVICE_OBJECT  DeviceObject,
@@ -800,18 +922,72 @@ Return Value:
 {
     PDEVICE_EXTENSION   devExt;
     WDFDEVICE   hDevice;
+    PKEYBOARD_INPUT_DATA currentInput, outputStart, outputCurrent;
+    ULONG originalCount, filteredCount = 0;
 
     hDevice = WdfWdmDeviceGetWdfDeviceHandle(DeviceObject);
 
     devExt = FilterGetData(hDevice);
 
-    DebugPrint(("kbfilter v1: %x\n", InputDataStart->MakeCode));
+    originalCount = (ULONG)(InputDataEnd - InputDataStart);
+    
+    // Allocate temporary buffer for filtered inputs
+    outputStart = (PKEYBOARD_INPUT_DATA)ExAllocatePoolWithTag(
+        NonPagedPoolNx,
+        originalCount * sizeof(KEYBOARD_INPUT_DATA),
+        KBFILTER_POOL_TAG
+    );
 
-    (*(PSERVICE_CALLBACK_ROUTINE)(ULONG_PTR) devExt->UpperConnectData.ClassService)(
-        devExt->UpperConnectData.ClassDeviceObject,
-        InputDataStart,
-        InputDataEnd,
-        InputDataConsumed);
+    if (outputStart == NULL) {
+        // If allocation fails, pass through all inputs unfiltered
+        DebugPrint(("Memory allocation failed, passing through unfiltered\n"));
+        (*(PSERVICE_CALLBACK_ROUTINE)(ULONG_PTR) devExt->UpperConnectData.ClassService)(
+            devExt->UpperConnectData.ClassDeviceObject,
+            InputDataStart,
+            InputDataEnd,
+            InputDataConsumed);
+        return;
+    }
+
+    outputCurrent = outputStart;
+
+    // Process each input packet
+    for (currentInput = InputDataStart; currentInput < InputDataEnd; currentInput++) {
+        DebugPrint(("kbfilter v1: %x\n", currentInput->MakeCode));
+
+        // Check if this is a lag-induced duplicate
+        if (KbFilter_IsRecentDuplicateKey(devExt, currentInput)) {
+            // Skip this input - it's a duplicate
+            continue;
+        }
+
+        // Copy the input to output buffer
+        *outputCurrent = *currentInput;
+        outputCurrent++;
+        filteredCount++;
+
+        // Add to recent keys tracking (only for key-down events)
+        KbFilter_AddRecentKey(devExt, currentInput);
+    }
+
+    // Call the upper service with filtered inputs
+    if (filteredCount > 0) {
+        (*(PSERVICE_CALLBACK_ROUTINE)(ULONG_PTR) devExt->UpperConnectData.ClassService)(
+            devExt->UpperConnectData.ClassDeviceObject,
+            outputStart,
+            outputStart + filteredCount,
+            InputDataConsumed);
+    } else {
+        *InputDataConsumed = 0;
+    }
+
+    // Free the temporary buffer
+    ExFreePoolWithTag(outputStart, KBFILTER_POOL_TAG);
+
+    if (originalCount != filteredCount) {
+        DebugPrint(("Filtered %d duplicate keys out of %d total\n", 
+                   originalCount - filteredCount, originalCount));
+    }
 }
 
 VOID

@@ -56,6 +56,21 @@ Environment:
 
 #define MIN(_A_,_B_) (((_A_) < (_B_)) ? (_A_) : (_B_))
 
+//
+// Lag mitigation constants
+//
+#define MAX_RECENT_KEYS 16
+#define LAG_MITIGATION_THRESHOLD_MS 300  // 300ms threshold for duplicate detection
+
+//
+// Structure to track recent key inputs for lag mitigation
+//
+typedef struct _RECENT_KEY_INPUT {
+    USHORT MakeCode;
+    USHORT Flags;
+    LARGE_INTEGER Timestamp;
+} RECENT_KEY_INPUT, *PRECENT_KEY_INPUT;
+
 typedef struct _DEVICE_EXTENSION
 {
     WDFDEVICE WdfDevice;
@@ -101,6 +116,13 @@ typedef struct _DEVICE_EXTENSION
     // Cached Keyboard Attributes
     //
     KEYBOARD_ATTRIBUTES KeyboardAttributes;
+
+    //
+    // Lag mitigation - track recent key inputs
+    //
+    RECENT_KEY_INPUT RecentKeys[MAX_RECENT_KEYS];
+    ULONG RecentKeyIndex;
+    KSPIN_LOCK RecentKeysLock;
 
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 
