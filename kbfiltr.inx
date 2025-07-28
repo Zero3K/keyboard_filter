@@ -14,6 +14,7 @@ Class=Keyboard
 ;         If you use bogus catalog file installation will fail.
 ; Ignore the error from chkinf.
 CatalogFile=KmdfSamples.cat
+PnpLockdown=1
 
 DriverVer=07/20/1999, 1.0.0.0
 
@@ -29,7 +30,7 @@ kbfiltr_CoInstaller_CopyFiles = 11
 %DDK_Ex%   = DDK_Ex.Mfg,NT$ARCH$
 
 ; For Win2K
-[DDK_Ex.Mfg]
+[DDK_Ex.Mfg.NTx86]
 %DDK_Ex% = kbfiltr, *PNP0BAAD
 
 ; For XP and above
