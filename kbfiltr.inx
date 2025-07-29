@@ -11,7 +11,7 @@ Provider=%DDK_Ex%
 ClassGUID={4D36E96B-E325-11CE-BFC1-08002BE10318}
 Class=Keyboard
 CatalogFile=kbfiltr.cat
-DriverVer=06/21/2006,6.1.7600.16385
+DriverVer=07/29/2024,6.1.7601.17514
 
 [DestinationDirs]
 DefaultDestDir   = 12
@@ -21,17 +21,37 @@ DefaultDestDir   = 12
 ;
 
 [Manufacturer]
-%DDK_Ex%   = DDK_Ex.Mfg,NT$ARCH$
+%DDK_Ex%   = DDK_Ex.Mfg,NTamd64.6.1,NTamd64,NTx86.6.1,NTx86
 
-; For XP and above
-[DDK_Ex.Mfg.NT$ARCH$]
+; For Windows 7 x64 and above
+[DDK_Ex.Mfg.NTamd64.6.1]
+%DDK_Ex% = kbfiltr, *PNP0BAAD
+
+; For other x64 Windows versions
+[DDK_Ex.Mfg.NTamd64]
+%DDK_Ex% = kbfiltr, *PNP0BAAD
+
+; For Windows 7 x86 and above  
+[DDK_Ex.Mfg.NTx86.6.1]
+%DDK_Ex% = kbfiltr, *PNP0BAAD
+
+; For other x86 Windows versions
+[DDK_Ex.Mfg.NTx86]
 %DDK_Ex% = kbfiltr, *PNP0BAAD
 
 ;
 ; General installation section
 ;
 
-[kbfiltr.NT]
+[kbfiltr.NTamd64]
+; perform port related actions from keyboard.inf
+Include=keyboard.inf
+Needs=STANDARD_Inst
+
+; Copy the driver over
+CopyFiles=kbfiltr.CopyFiles
+
+[kbfiltr.NTx86]
 ; perform port related actions from keyboard.inf
 Include=keyboard.inf
 Needs=STANDARD_Inst
@@ -52,7 +72,13 @@ kbfiltr.sys
 ; Service Installation
 ;
 
-[kbfiltr.NT.Services]
+[kbfiltr.NTamd64.Services]
+AddService = kbfiltr,  , kbfiltr_Service_Inst
+; Install the port driver and mouclass from keyboard.inf
+Include=keyboard.inf
+Needs=STANDARD_Inst.Services
+
+[kbfiltr.NTx86.Services]
 AddService = kbfiltr,  , kbfiltr_Service_Inst
 ; Install the port driver and mouclass from keyboard.inf
 Include=keyboard.inf
@@ -66,7 +92,15 @@ ErrorControl   = 0                  ; SERVICE_ERROR_IGNORE
 LoadOrderGroup = Keyboard Port
 ServiceBinary  = %12%\kbfiltr.sys
 
-[kbfiltr.NT.HW]
+[kbfiltr.NTamd64.HW]
+; Add the device upper filter
+AddReg = kbfiltr.HW.AddReg
+
+; run the directives need by the port driver
+Include=keyboard.inf
+Needs=STANDARD_Inst.HW
+
+[kbfiltr.NTx86.HW]
 ; Add the device upper filter
 AddReg = kbfiltr.HW.AddReg
 
