@@ -64,7 +64,7 @@ if "%OS_VER%"=="Win7" (
 
 REM Create final INF file with CatalogFile directive enabled
 echo Creating final INF file with catalog reference...
-powershell -Command "(Get-Content '%INTERMEDIATE_DIR%\kbfiltr.inf') -replace ';CatalogFile=kbfiltr.cat', 'CatalogFile=kbfiltr.cat' | Set-Content '%BUILD_DIR%\kbfiltr.inf'"
+copy "%INTERMEDIATE_DIR%\kbfiltr.inf" "%BUILD_DIR%\kbfiltr.inf"
 
 REM Create catalog file using inf2cat
 echo Running inf2cat to create catalog file...

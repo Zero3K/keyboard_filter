@@ -70,10 +70,8 @@ switch ($OSVersion) {
 $BuildInfPath = Join-Path $BuildDir "kbfiltr.inf"
 Write-Host "Creating final INF file with catalog reference..." -ForegroundColor Yellow
 
-# Read the INF content and uncomment the CatalogFile line
-$infContent = Get-Content $InfPath
-$finalInfContent = $infContent -replace ';CatalogFile=kbfiltr.cat', 'CatalogFile=kbfiltr.cat'
-$finalInfContent | Set-Content $BuildInfPath
+# Copy the INF file (CatalogFile directive is already enabled in source)
+Copy-Item $InfPath $BuildInfPath
 
 # Create catalog file using inf2cat
 Write-Host "Running inf2cat to create catalog file..." -ForegroundColor Yellow
