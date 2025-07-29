@@ -20,7 +20,6 @@ DriverVer=07/20/1999, 1.0.0.0
 
 [DestinationDirs]
 DefaultDestDir   = 12
-kbfiltr_CoInstaller_CopyFiles = 11
 
 ;
 ; Driver information
@@ -98,31 +97,6 @@ HKR,,"UpperFilters",0x00010000,"kbfiltr"
 
 [SourceDisksFiles]
 kbfiltr.sys = 1,,
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
-
-;
-;--- kbfiltr Coinstaller installation ------
-;
-
-
-
-[kbfiltr.NT.CoInstallers]
-AddReg=kbfiltr_CoInstaller_AddReg
-CopyFiles=kbfiltr_CoInstaller_CopyFiles
-
-[kbfiltr_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[kbfiltr_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
-
-
-
-[kbfiltr.NT.Wdf]
-KmdfService = kbfiltr, kbfiltr_wdfsect
-[kbfiltr_wdfsect]
-KmdfLibraryVersion = $KMDFVERSION$
-
 
 
 [Strings]

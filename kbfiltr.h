@@ -28,8 +28,6 @@ Environment:
 
 #pragma warning(default:4201)
 
-#include <wdf.h>
-
 #define NTSTRSAFE_LIB
 #include <ntstrsafe.h>
 
@@ -73,12 +71,15 @@ typedef struct _RECENT_KEY_INPUT {
 
 typedef struct _DEVICE_EXTENSION
 {
-    WDFDEVICE WdfDevice;
+    //
+    // Back pointer to device object
+    //
+    PDEVICE_OBJECT DeviceObject;
 
     //
-    // Queue for handling requests that come from the rawPdo
+    // Target device for requests
     //
-    WDFQUEUE rawPdoQueue;
+    PDEVICE_OBJECT TargetDeviceObject;
 
     //
     // Number of creates sent down
@@ -126,28 +127,31 @@ typedef struct _DEVICE_EXTENSION
 
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_EXTENSION,
-                                        FilterGetData)
-
+//
+// Function to get device extension from device object
+//
+#define FilterGetData(DeviceObject) \
+    ((PDEVICE_EXTENSION) DeviceObject->DeviceExtension)
 
 typedef struct _WORKER_ITEM_CONTEXT {
 
-    WDFREQUEST  Request;
-    WDFIOTARGET IoTarget;
+    PIRP Request;
+    PDEVICE_OBJECT DeviceObject;
 
 } WORKER_ITEM_CONTEXT, *PWORKER_ITEM_CONTEXT;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(WORKER_ITEM_CONTEXT, GetWorkItemContext)
 
 //
 // Prototypes
 //
 DRIVER_INITIALIZE DriverEntry;
+DRIVER_ADD_DEVICE KbFilter_AddDevice;
 
-EVT_WDF_DRIVER_DEVICE_ADD KbFilter_EvtDeviceAdd;
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL KbFilter_EvtIoDeviceControlForRawPdo;
-EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL KbFilter_EvtIoDeviceControlFromRawPdo;
-EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL KbFilter_EvtIoInternalDeviceControl;
+DRIVER_DISPATCH KbFilter_DispatchGeneral;
+DRIVER_DISPATCH KbFilter_DispatchInternalDeviceControl;
+DRIVER_UNLOAD KbFilter_Unload;
+
+EVT_WDF_REQUEST_COMPLETION_ROUTINE
+KbFilterRequestCompletionRoutine;
 
 NTSTATUS
 KbFilter_InitializationRoutine(
@@ -177,8 +181,7 @@ KbFilter_ServiceCallback(
     IN OUT PULONG InputDataConsumed
     );
 
-EVT_WDF_REQUEST_COMPLETION_ROUTINE
-KbFilterRequestCompletionRoutine;
+IO_COMPLETION_ROUTINE KbFilterRequestCompletionRoutine;
 
 
 //
@@ -202,23 +205,30 @@ DEFINE_GUID(GUID_DEVINTERFACE_KBFILTER,
 
 typedef struct _RPDO_DEVICE_DATA
 {
-
     ULONG InstanceNo;
 
     //
-    // Queue of the parent device we will forward requests to
+    // Device object for the rawPdo
     //
-    WDFQUEUE ParentQueue;
+    PDEVICE_OBJECT DeviceObject;
+
+    //
+    // Parent device object 
+    //
+    PDEVICE_OBJECT ParentDeviceObject;
 
 } RPDO_DEVICE_DATA, *PRPDO_DEVICE_DATA;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(RPDO_DEVICE_DATA, PdoGetData)
-
+//
+// Function to get rawPdo device data from device object
+//
+#define PdoGetData(DeviceObject) \
+    ((PRPDO_DEVICE_DATA) DeviceObject->DeviceExtension)
 
 NTSTATUS
 KbFiltr_CreateRawPdo(
-    WDFDEVICE       Device,
-    ULONG           InstanceNo
+    PDEVICE_OBJECT       Device,
+    ULONG                InstanceNo
 );
 
 
