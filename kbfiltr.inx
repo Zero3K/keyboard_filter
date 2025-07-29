@@ -28,10 +28,6 @@ DefaultDestDir   = 12
 [Manufacturer]
 %DDK_Ex%   = DDK_Ex.Mfg,NT$ARCH$
 
-; For Win2K
-[DDK_Ex.Mfg.NTx86]
-%DDK_Ex% = kbfiltr, *PNP0BAAD
-
 ; For XP and above
 [DDK_Ex.Mfg.NT$ARCH$]
 %DDK_Ex% = kbfiltr, *PNP0BAAD
