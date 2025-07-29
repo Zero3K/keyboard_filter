@@ -13,7 +13,7 @@ Class=Keyboard
 ; Uncomment the following line when you have a valid catalog file.
 ;         If you use bogus catalog file installation will fail.
 ; Ignore the error from chkinf.
-;CatalogFile=KmdfSamples.cat
+CatalogFile=kbfiltr.cat
 PnpLockdown=1
 
 DriverVer=01/01/2024, 1.0.0.0
