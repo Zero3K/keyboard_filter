@@ -62,6 +62,10 @@ if "%OS_VER%"=="Win7" (
     exit /b 1
 )
 
+REM Clean up any previous catalog files and extra directories to avoid conflicts
+if exist "%BUILD_DIR%\kbfiltr.cat" del "%BUILD_DIR%\kbfiltr.cat"
+if exist "%BUILD_DIR%\kbfiltr" rmdir /s /q "%BUILD_DIR%\kbfiltr"
+
 REM Create final INF file with CatalogFile directive enabled
 echo Creating final INF file with catalog reference...
 copy "%INTERMEDIATE_DIR%\kbfiltr.inf" "%BUILD_DIR%\kbfiltr.inf"

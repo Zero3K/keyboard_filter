@@ -66,6 +66,12 @@ switch ($OSVersion) {
     }
 }
 
+# Clean up any previous catalog files and extra directories to avoid conflicts
+$CatalogPath = Join-Path $BuildDir "kbfiltr.cat"
+$ExtraDir = Join-Path $BuildDir "kbfiltr"
+if (Test-Path $CatalogPath) { Remove-Item $CatalogPath }
+if (Test-Path $ExtraDir) { Remove-Item $ExtraDir -Recurse -Force }
+
 # Create final INF file with CatalogFile directive enabled
 $BuildInfPath = Join-Path $BuildDir "kbfiltr.inf"
 Write-Host "Creating final INF file with catalog reference..." -ForegroundColor Yellow
