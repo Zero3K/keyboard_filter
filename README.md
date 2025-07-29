@@ -1,7 +1,17 @@
 # Build
 
+**Note**: This driver has been converted from WDF (Windows Driver Framework) to WDM (Windows Driver Model) to eliminate the WdfCoInstaller dependency and ensure compatibility with Windows Server 2003 and up.
+
 ```bash
 msbuild kbfiltr.vcxproj /p:Configuration="Win8.1 Release" /property:Platform=x64
+```
+
+**Architecture Changes:**
+- Converted from KMDF to WDM driver type
+- Removed all WDF framework dependencies
+- Eliminated WdfCoInstaller requirement
+- Maintains all core keyboard filtering functionality
+- Raw PDO functionality temporarily disabled (can be re-implemented in WDM if needed)
 
 ## Sign
 # 1. Create test signing certificate

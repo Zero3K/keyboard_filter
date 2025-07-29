@@ -150,8 +150,7 @@ DRIVER_DISPATCH KbFilter_DispatchGeneral;
 DRIVER_DISPATCH KbFilter_DispatchInternalDeviceControl;
 DRIVER_UNLOAD KbFilter_Unload;
 
-EVT_WDF_REQUEST_COMPLETION_ROUTINE
-KbFilterRequestCompletionRoutine;
+IO_COMPLETION_ROUTINE KbFilterRequestCompletionRoutine;
 
 NTSTATUS
 KbFilter_InitializationRoutine(
