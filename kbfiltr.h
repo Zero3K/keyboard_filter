@@ -225,11 +225,14 @@ typedef struct _RPDO_DEVICE_DATA
 #define PdoGetData(DeviceObject) \
     ((PRPDO_DEVICE_DATA) DeviceObject->DeviceExtension)
 
+// Raw PDO functionality is disabled to minimize WDF dependencies
+/*
 NTSTATUS
 KbFiltr_CreateRawPdo(
     PDEVICE_OBJECT       Device,
     ULONG                InstanceNo
 );
+*/
 
 
 

@@ -381,7 +381,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kbfiltr.c" />
-    <ClCompile Include="rawpdo.c" />
     <ResourceCompile Include="kbfiltr.rc" />
   </ItemGroup>
   <ItemGroup>
