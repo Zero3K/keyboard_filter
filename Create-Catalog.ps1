@@ -66,10 +66,14 @@ switch ($OSVersion) {
     }
 }
 
-# Copy INF file to build directory for catalog creation
+# Create final INF file with CatalogFile directive enabled
 $BuildInfPath = Join-Path $BuildDir "kbfiltr.inf"
-Write-Host "Copying INF file to build directory..." -ForegroundColor Yellow
-Copy-Item $InfPath $BuildInfPath -Force
+Write-Host "Creating final INF file with catalog reference..." -ForegroundColor Yellow
+
+# Read the INF content and uncomment the CatalogFile line
+$infContent = Get-Content $InfPath
+$finalInfContent = $infContent -replace ';CatalogFile=kbfiltr.cat', 'CatalogFile=kbfiltr.cat'
+$finalInfContent | Set-Content $BuildInfPath
 
 # Create catalog file using inf2cat
 Write-Host "Running inf2cat to create catalog file..." -ForegroundColor Yellow
@@ -93,6 +97,12 @@ try {
 $CatalogPath = Join-Path $BuildDir "kbfiltr.cat"
 if (Test-Path $CatalogPath) {
     Write-Host "Success: Catalog file created at '$CatalogPath'" -ForegroundColor Green
+    Write-Host "Success: Final INF file created at '$BuildInfPath'" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Complete driver package contents:" -ForegroundColor Cyan
+    Write-Host "- Driver:  $DriverPath" -ForegroundColor White
+    Write-Host "- INF:     $BuildInfPath (with catalog reference)" -ForegroundColor White  
+    Write-Host "- Catalog: $CatalogPath" -ForegroundColor White
     Write-Host ""
     Write-Host "Next steps:" -ForegroundColor Cyan
     Write-Host "1. Sign the catalog file with your code signing certificate" -ForegroundColor White

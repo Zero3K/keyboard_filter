@@ -2,6 +2,13 @@
 
 **Note**: This driver has been converted from WDF (Windows Driver Framework) to WDM (Windows Driver Model) to eliminate the WdfCoInstaller dependency and ensure compatibility with Windows Server 2003 and up.
 
+## Build Process Overview
+
+The build process is designed to resolve the circular dependency between the driver build and catalog creation:
+1. **Initial Build**: The driver builds without catalog validation (CatalogFile directive is commented out in the INX template)
+2. **Catalog Creation**: Scripts create the catalog file and generate a final INF with the CatalogFile directive enabled
+3. **Result**: A complete, ready-to-sign driver package
+
 ## Step 1: Build the driver
 
 ```bash
@@ -10,7 +17,7 @@ msbuild kbfiltr.vcxproj /p:Configuration="Win8.1 Release" /property:Platform=x64
 
 ## Step 2: Create the catalog file
 
-After building the driver, create the catalog file using one of the provided scripts:
+After building the driver, create the catalog file using one of the provided scripts. The scripts will create a complete driver package with the catalog file and a final INF file that references it:
 
 **Batch Script:**
 ```bash
@@ -37,9 +44,15 @@ create_catalog.bat x64 Win8
 ```
 
 Both scripts will:
-- Validate that the driver and INF files exist
+- Create a final INF file with the CatalogFile directive enabled
 - Run `inf2cat` to create the catalog file (`kbfiltr.cat`)
-- Verify the catalog was created successfully
+- Generate a complete driver package ready for signing
+- Verify all files were created successfully
+
+The complete driver package will contain:
+- `kbfiltr.sys` - The driver binary
+- `kbfiltr.inf` - INF file with catalog reference enabled  
+- `kbfiltr.cat` - Catalog file for signing
 
 **Architecture Changes:**
 - Converted from KMDF to WDM driver type

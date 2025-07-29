@@ -62,8 +62,9 @@ if "%OS_VER%"=="Win7" (
     exit /b 1
 )
 
-REM Copy INF file to build directory for catalog creation
-copy "%INTERMEDIATE_DIR%\kbfiltr.inf" "%BUILD_DIR%\"
+REM Create final INF file with CatalogFile directive enabled
+echo Creating final INF file with catalog reference...
+powershell -Command "(Get-Content '%INTERMEDIATE_DIR%\kbfiltr.inf') -replace ';CatalogFile=kbfiltr.cat', 'CatalogFile=kbfiltr.cat' | Set-Content '%BUILD_DIR%\kbfiltr.inf'"
 
 REM Create catalog file using inf2cat
 echo Running inf2cat to create catalog file...
@@ -77,6 +78,12 @@ if errorlevel 1 (
 REM Verify catalog file was created
 if exist "%BUILD_DIR%\kbfiltr.cat" (
     echo Success: Catalog file created at %BUILD_DIR%\kbfiltr.cat
+    echo Success: Final INF file created at %BUILD_DIR%\kbfiltr.inf
+    echo.
+    echo Complete driver package contents:
+    echo - Driver: %BUILD_DIR%\kbfiltr.sys
+    echo - INF:    %BUILD_DIR%\kbfiltr.inf (with catalog reference)
+    echo - Catalog: %BUILD_DIR%\kbfiltr.cat
     echo.
     echo Next steps:
     echo 1. Sign the catalog file with your code signing certificate
