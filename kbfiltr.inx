@@ -6,17 +6,12 @@
 ;
 
 [Version]
-Signature="$Windows NT$"
+Signature="$WINDOWS NT$"
 Provider=%DDK_Ex%
 ClassGUID={4D36E96B-E325-11CE-BFC1-08002BE10318}
 Class=Keyboard
-; Uncomment the following line when you have a valid catalog file.
-;         If you use bogus catalog file installation will fail.
-; Ignore the error from chkinf.
-CatalogFile=KmdfSamples.cat
-PnpLockdown=1
-
-DriverVer=07/20/1999, 1.0.0.0
+CatalogFile=kbfiltr.cat
+DriverVer=06/21/2006,6.1.7600.16385
 
 [DestinationDirs]
 DefaultDestDir   = 12
